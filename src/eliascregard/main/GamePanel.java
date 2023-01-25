@@ -11,7 +11,7 @@ import static java.lang.Math.PI;
 
 
 public class GamePanel extends JPanel implements Runnable {
-    private Dimension SCREEN_SIZE = Main.SCREEN_SIZE;
+    private final Dimension SCREEN_SIZE = Main.SCREEN_SIZE;
     private final Dimension DEFAULT_SCREEN_SIZE = new Dimension(2000, 1000);
     private double SCREEN_SCALE = (double) SCREEN_SIZE.width / DEFAULT_SCREEN_SIZE.width;
     private int MAX_FRAME_RATE = 200;
@@ -40,8 +40,8 @@ public class GamePanel extends JPanel implements Runnable {
     private final StaticBody[][] staticBodies = new StaticBody[map.getWidth()][map.getHeight()];
 
     private final double cellSize = (double) DEFAULT_SCREEN_SIZE.height / map.getHeight();
-    private final double fov = Math.toRadians(90);
-    private final int rayCount = 500;
+    private final double fov = Math.toRadians(360);
+    private final int rayCount = 1000;
     private final double rayLength = 1000;
     private double[] distances = new double[rayCount];
 
@@ -198,7 +198,7 @@ public class GamePanel extends JPanel implements Runnable {
         double angle = player.getAngle() - fov / 2.0;
         double angleIncrement = fov / (double) rayCount;
         g2.setColor(new Color(255, 255, 0));
-        g2.setStroke(new BasicStroke(4));
+        g2.setStroke(new BasicStroke(1));
         for (int i = 0; i < rayCount; i++) {
             Line ray = new Line(
                     player.getPosition().x, player.getPosition().y,

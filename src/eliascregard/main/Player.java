@@ -72,11 +72,6 @@ public class Player {
     public void draw(Graphics2D g2, double scale) {
         g2.setColor(new Color(255, 255, 0));
         g2.fillRect((int) ((position.x - 10) * scale), (int) ((position.y - 10) * scale), (int) (20 * scale), (int) (20 * scale));
-        g2.setStroke(new BasicStroke(3 * (float) scale));
-        g2.drawLine(
-                (int) (position.x * scale), (int) (position.y * scale),
-                (int) ((position.x + 40 * Math.cos(angle)) * scale), (int) ((position.y + 40 * Math.sin(angle)) * scale)
-        );
 
     }
 }
