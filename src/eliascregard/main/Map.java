@@ -62,15 +62,17 @@ public class Map {
         }
     }
 
-    public void draw(Graphics2D g2, int x, int y, int width, int height) {
-        pixelGrid.draw(g2, x, y, width, height);
+    public void draw(Graphics2D g2, int x, int y, int width, int height, double scale) {
+        pixelGrid.draw(g2, x, y, width, height, scale);
         for (int i = 1; i < size.width; i++) {
             g2.setColor(new Color(0, 0, 0));
-            g2.drawLine(x + i * width / size.width, y, x + i * width / size.width, y + height);
+            g2.drawLine((int) ((x + i * width / size.width) * scale), (int) (y * scale),
+                    (int) ((x + i * width / size.width) * scale), (int) ((y + height) * scale));
         }
         for (int i = 1; i < size.height; i++) {
             g2.setColor(new Color(0, 0, 0));
-            g2.drawLine(x, y + i * height / size.height, x + width, y + i * height / size.height);
+            g2.drawLine((int) (x * scale), (int) ((y + i * height / size.height) * scale), (int) ((x + width) * scale),
+                    (int) ((y + i * height / size.height) * scale));
         }
     }
 

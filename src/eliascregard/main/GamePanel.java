@@ -193,8 +193,8 @@ public class GamePanel extends JPanel implements Runnable {
         g2.fillRect(0, 0, SCREEN_SIZE.width, SCREEN_SIZE.height);
 
 
-        // Right-panel
-        map.draw(g2, 0, 0, 1000,1000);
+        // Left-panel
+        map.draw(g2, 0, 0, 1000,1000, SCREEN_SCALE);
         double angle = player.getAngle() - fov / 2.0;
         double angleIncrement = fov / (double) rayCount;
         g2.setColor(new Color(255, 255, 0));
@@ -205,18 +205,21 @@ public class GamePanel extends JPanel implements Runnable {
                     player.getPosition().x + distances[i] * Math.cos(angle),
                     player.getPosition().y + distances[i] * Math.sin(angle)
             );
-            g2.drawLine((int) ray.point1.x, (int) ray.point1.y, (int) ray.point2.x, (int) ray.point2.y);
+            g2.drawLine((int) (ray.point1.x * SCREEN_SCALE), (int) (ray.point1.y * SCREEN_SCALE),
+                    (int) (ray.point2.x * SCREEN_SCALE), (int) (ray.point2.y * SCREEN_SCALE));
             angle += angleIncrement;
         }
         player.draw(g2, SCREEN_SCALE);
 
 
-        // Left-panel
+        // Right-panel
         double center = DEFAULT_SCREEN_SIZE.height / 2.0;
         double thickness = (double) DEFAULT_SCREEN_SIZE.width / (rayCount * 2);
         for (int i = 0; i < rayCount; i++) {
             g2.setColor(new Color((int) (255 * ((rayLength - distances[i]) / rayLength)), 0, 0));
-            g2.fillRect((int) (i * thickness) + 1000, (int) (center - (rayLength - distances[i]) * 2 / 4.0), (int) thickness, (int) (rayLength - distances[i]));
+            g2.fillRect((int) (((i * thickness) + DEFAULT_SCREEN_SIZE.width / 2) * SCREEN_SCALE),
+                    (int) ((center - (rayLength - distances[i]) * 2 / 4.0) * SCREEN_SCALE),
+                    (int) thickness, (int) ((rayLength - distances[i]) * SCREEN_SCALE));
         }
         g2.dispose();
     }
