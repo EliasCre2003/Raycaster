@@ -5,15 +5,19 @@ import eliascregard.physics.Vector2D;
 
 public class Cell {
     private final Vector2D position;
-    private final int size;
+    private final double size;
     private final Line[] lines;
     private final Line[] hitLines;
 
-    public Cell(Vector2D position, int size) {
+    public Cell(Vector2D position, double size) {
         this.position = position;
         this.size = size;
         this.lines = generateLines();
         this.hitLines = generateHitLines();
+    }
+
+    public Cell(double x, double y, double size) {
+        this(new Vector2D(x, y), size);
     }
 
     private Line[] generateLines() {
@@ -38,7 +42,7 @@ public class Cell {
         return position;
     }
 
-    public int getSize() {
+    public double getSize() {
         return size;
     }
 

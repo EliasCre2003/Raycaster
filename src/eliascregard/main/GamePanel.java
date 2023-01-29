@@ -37,10 +37,9 @@ public class GamePanel extends JPanel implements Runnable {
             {1, 1, 1, 1, 1, 1, 1, 1}
     });
 
-    private final StaticBody[][] staticBodies = new StaticBody[map.getWidth()][map.getHeight()];
-
+    private final Cell[][] cellStatics = new Cell[map.getWidth()][map.getHeight()];
     private final double cellSize = (double) DEFAULT_SCREEN_SIZE.height / map.getHeight();
-    private final double fov = Math.toRadians(360);
+    private final double fov = Math.toRadians(90);
     private final int rayCount = 1000;
     private final double rayLength = 1000;
     private double[] distances = new double[rayCount];
@@ -59,7 +58,7 @@ public class GamePanel extends JPanel implements Runnable {
             for (int x = 0; x < map.getWidth(); x++) {
                 for (int y = 0; y < map.getHeight(); y++) {
                     if (!map.get(x, y)) continue;
-                    Line[] cellLines = staticBodies[x][y].getLines();
+                    Line[] cellLines = cellStatics[x][y].getLines();
                     for (Line line : cellLines) {
                         Vector2D intersection = Line.intersection(ray, line);
                         if (intersection != null) {
@@ -120,12 +119,7 @@ public class GamePanel extends JPanel implements Runnable {
         for (int i = 0; i < map.getWidth(); i++) {
             for (int j = 0; j < map.getHeight(); j++) {
                 if (map.get(i, j)) {
-                    staticBodies[i][j] = new StaticBody(new Vector2D[]{
-                            new Vector2D(i * cellSize, j * cellSize),
-                            new Vector2D(i * cellSize + cellSize, j * cellSize),
-                            new Vector2D(i * cellSize + cellSize, j * cellSize + cellSize),
-                            new Vector2D(i * cellSize, j * cellSize + cellSize)
-                    });
+                    cellStatics[i][j] = new Cell(i * cellSize, j * cellSize, cellSize);
                 }
             }
         }
@@ -159,6 +153,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void update() {
+
         int direction = 0;
         double angle = player.getAngle();
         if (keys.wPressed) {
@@ -174,10 +169,10 @@ public class GamePanel extends JPanel implements Runnable {
             angle += PI * deltaTime;
         }
         castRays(fov, rayCount, rayLength);
-        for (int x = 0; x < staticBodies.length; x++) {
-            for (int y = 0; y < staticBodies[x].length; y++) {
-                if (staticBodies[x][y] != null) {
-                    player.collide(staticBodies[x][y]);
+        for (Cell[] cellRow : cellStatics) {
+            for (Cell cell : cellRow) {
+                if (cell != null) {
+                    player.collide(cell);
                 }
             }
         }
@@ -198,7 +193,7 @@ public class GamePanel extends JPanel implements Runnable {
         double angle = player.getAngle() - fov / 2.0;
         double angleIncrement = fov / (double) rayCount;
         g2.setColor(new Color(255, 255, 0));
-        g2.setStroke(new BasicStroke(1));
+        g2.setStroke(new BasicStroke(2));
         for (int i = 0; i < rayCount; i++) {
             Line ray = new Line(
                     player.getPosition().x, player.getPosition().y,
@@ -213,13 +208,18 @@ public class GamePanel extends JPanel implements Runnable {
 
 
         // Right-panel
+        angle = player.getAngle() - fov / 2.0;
         double center = DEFAULT_SCREEN_SIZE.height / 2.0;
         double thickness = (double) DEFAULT_SCREEN_SIZE.width / (rayCount * 2);
         for (int i = 0; i < rayCount; i++) {
-            g2.setColor(new Color((int) (255 * ((rayLength - distances[i]) / rayLength)), 0, 0));
+            double distance = distances[i] * Math.cos(player.getAngle() - angle);
+            double height = rayLength * 90 / distance;
+            g2.setColor(new Color((int) (255 * ((rayLength - distance) / rayLength)), 0, 0));
             g2.fillRect((int) (((i * thickness) + DEFAULT_SCREEN_SIZE.width / 2) * SCREEN_SCALE),
-                    (int) ((center - (rayLength - distances[i]) * 2 / 4.0) * SCREEN_SCALE),
-                    (int) thickness, (int) ((rayLength - distances[i]) * SCREEN_SCALE));
+                    (int) ((center - height / 2) * SCREEN_SCALE),
+                    (int) Math.ceil(thickness * SCREEN_SCALE), (int) (height * SCREEN_SCALE)
+            );
+            angle += angleIncrement;
         }
         g2.dispose();
     }

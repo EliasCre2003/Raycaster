@@ -39,8 +39,8 @@ public class Player {
         position.add(directionVector.scaled(speed * deltaTime));
     }
 
-    public void collide(StaticBody body) {
-        Line[] lines = body.getLines();
+    public void collide(Cell cell) {
+        Line[] lines = cell.getHitLines();
         Line ray = new Line(position, new Vector2D(position.x + Integer.MAX_VALUE, position.y));
         int intersections = 0;
         Vector2D[] closestPoints = new Vector2D[lines.length];
