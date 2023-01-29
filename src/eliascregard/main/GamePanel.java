@@ -27,14 +27,18 @@ public class GamePanel extends JPanel implements Runnable {
     private int fps;
     private final Player player = new Player(300, 300, 200);
     private final Map map = new Map(new int[][]{
-            {1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 1, 0, 1},
-            {1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1}
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+            {1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
+            {1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+            {1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
     });
 
     private final Cell[][] cellStatics = new Cell[map.getWidth()][map.getHeight()];
@@ -193,7 +197,7 @@ public class GamePanel extends JPanel implements Runnable {
         double angle = player.getAngle() - fov / 2.0;
         double angleIncrement = fov / (double) rayCount;
         g2.setColor(new Color(255, 255, 0));
-        g2.setStroke(new BasicStroke(2));
+        g2.setStroke(new BasicStroke((float) (3 * SCREEN_SCALE)));
         for (int i = 0; i < rayCount; i++) {
             Line ray = new Line(
                     player.getPosition().x, player.getPosition().y,
