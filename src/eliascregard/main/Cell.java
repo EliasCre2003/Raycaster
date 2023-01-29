@@ -6,6 +6,9 @@ import eliascregard.physics.Vector2D;
 import java.awt.*;
 
 public class Cell {
+
+    private final static double hitBoxSize = 3;
+
     private final Vector2D position;
     private final double size;
     private final Line[] lines;
@@ -39,10 +42,14 @@ public class Cell {
 
     private Line[] generateHitLines() {
         return new Line[]{
-                new Line(new Vector2D(position.x-1, position.y-1), new Vector2D(position.x + size + 1, position.y - 1)),
-                new Line(new Vector2D(position.x-1, position.y-1), new Vector2D(position.x - 1, position.y + size + 1)),
-                new Line(new Vector2D(position.x + size + 1, position.y - 1), new Vector2D(position.x + size + 1, position.y + size + 1)),
-                new Line(new Vector2D(position.x - 1, position.y + size + 1), new Vector2D(position.x + size + 1, position.y + size + 1))
+                new Line(new Vector2D(position.x-hitBoxSize, position.y-hitBoxSize),
+                        new Vector2D(position.x + size + hitBoxSize, position.y - hitBoxSize)),
+                new Line(new Vector2D(position.x-hitBoxSize, position.y-hitBoxSize),
+                        new Vector2D(position.x - hitBoxSize, position.y + size + hitBoxSize)),
+                new Line(new Vector2D(position.x + size + hitBoxSize, position.y - hitBoxSize),
+                        new Vector2D(position.x + size + hitBoxSize, position.y + size + hitBoxSize)),
+                new Line(new Vector2D(position.x - hitBoxSize, position.y + size + hitBoxSize),
+                        new Vector2D(position.x + size + hitBoxSize, position.y + size + hitBoxSize))
         };
     }
 

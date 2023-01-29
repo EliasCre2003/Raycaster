@@ -47,49 +47,49 @@ public class GamePanel extends JPanel implements Runnable {
     private final int rayCount = 1000;
     private final double rayLength = 1000;
     private double[] distances = new double[rayCount];
+    private Ray[] rays = new Ray[rayCount];
 
-    private void castRays(double fov, int rayCount, double rayLength) {
+    private void castRays() {
         double angle = player.getAngle() - fov / 2.0;
         double angleIncrement = fov / (double) rayCount;
         double[] newDistances = new double[rayCount];
+        Ray[] newRays = new Ray[rayCount];
         for (int i = 0; i < rayCount; i++) {
-            Line ray = new Line(
-                    player.getPosition().x, player.getPosition().y,
-                    player.getPosition().x + rayLength * Math.cos(angle),
-                    player.getPosition().y + rayLength * Math.sin(angle)
-            );
-            double[] rayDistances = new double[0];
+            Line ray = getRay(angle);
+            Color color = new Color(0, 0, 0, 0);
+            double shortestDistance = rayLength;
             for (int x = 0; x < map.getWidth(); x++) {
                 for (int y = 0; y < map.getHeight(); y++) {
                     if (!map.get(x, y)) continue;
+                    Color cellColor = cellStatics[x][y].getColor();
                     Line[] cellLines = cellStatics[x][y].getLines();
                     for (Line line : cellLines) {
                         Vector2D intersection = Line.intersection(ray, line);
                         if (intersection != null) {
                             double distance = player.getPosition().distance(intersection);
                             if (distance > ray.length()) continue;
-                            double[] newRayDistances = new double[rayDistances.length + 1];
-                            System.arraycopy(rayDistances, 0, newRayDistances, 0, rayDistances.length);
-                            newRayDistances[rayDistances.length] = distance;
-                            rayDistances = newRayDistances;
+                            if (distance < shortestDistance) {
+                                shortestDistance = distance;
+                                color = cellColor;
+                            }
                         }
                     }
                 }
             }
-            angle += angleIncrement;
-            if (rayDistances.length == 0) {
-                newDistances[i] = rayLength;
-                continue;
-            }
-            double shortestDistance = rayDistances[0];
-            for (int j = 1; j < rayDistances.length; j++) {
-                if (rayDistances[j] < shortestDistance) {
-                    shortestDistance = rayDistances[j];
-                }
-            }
             newDistances[i] = shortestDistance;
+            newRays[i] = new Ray(shortestDistance * Math.cos(player.getAngle() - angle), color);
+            angle += angleIncrement;
         }
         distances = newDistances;
+        rays = newRays;
+    }
+
+    private Line getRay(double angle) {
+        return new Line(
+                player.getPosition().x, player.getPosition().y,
+                player.getPosition().x + rayLength * Math.cos(angle),
+                player.getPosition().y + rayLength * Math.sin(angle)
+        );
     }
 
     private void sleep(int nanoseconds) {
@@ -123,7 +123,8 @@ public class GamePanel extends JPanel implements Runnable {
         for (int i = 0; i < map.getWidth(); i++) {
             for (int j = 0; j < map.getHeight(); j++) {
                 if (map.get(i, j)) {
-                    cellStatics[i][j] = new Cell(i * cellSize, j * cellSize, cellSize);
+                    Color color = new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
+                    cellStatics[i][j] = new Cell(i * cellSize, j * cellSize, cellSize, color);
                 }
             }
         }
@@ -144,12 +145,10 @@ public class GamePanel extends JPanel implements Runnable {
             }
             update();
             ticks++;
-            if (MAX_FRAME_RATE > 0) {
-                if (renderDeltaT >= 1.0 / MAX_FRAME_RATE) {
-                    fps = time.getFPS(renderDeltaT);
-                    repaint();
-                    renderDeltaT -= 1.0 / MAX_FRAME_RATE;
-                }
+            if (MAX_FRAME_RATE > 0 && renderDeltaT >= 1.0 / MAX_FRAME_RATE) {
+                fps = time.getFPS(renderDeltaT);
+                repaint();
+                renderDeltaT -= 1.0 / MAX_FRAME_RATE;
             } else {
                 repaint();
             }
@@ -172,7 +171,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (keys.dPressed) {
             angle += PI * deltaTime;
         }
-        castRays(fov, rayCount, rayLength);
+        castRays();
         for (Cell[] cellRow : cellStatics) {
             for (Cell cell : cellRow) {
                 if (cell != null) {
@@ -212,19 +211,29 @@ public class GamePanel extends JPanel implements Runnable {
 
 
         // Right-panel
-        angle = player.getAngle() - fov / 2.0;
-        double center = DEFAULT_SCREEN_SIZE.height / 2.0;
-        double thickness = (double) DEFAULT_SCREEN_SIZE.width / (rayCount * 2);
+        double center = SCREEN_SIZE.height / 2.0;
+        double thickness = (double) SCREEN_SIZE.width / (rayCount * 2);
         for (int i = 0; i < rayCount; i++) {
-            double distance = distances[i] * Math.cos(player.getAngle() - angle);
+            Ray ray = rays[i];
+            if (ray == null) continue;
+            double distance = ray.getDistance();
             double height = rayLength * 90 / distance;
-            g2.setColor(new Color((int) (255 * ((rayLength - distance) / rayLength)), 0, 0));
-            g2.fillRect((int) (((i * thickness) + DEFAULT_SCREEN_SIZE.width / 2) * SCREEN_SCALE),
+            Color color = ray.getColor();
+            double colorConstant = (rayLength - distance) / rayLength;
+            if (colorConstant < 0) colorConstant = 0;
+            if (colorConstant > 1) colorConstant = 1;
+            color = new Color(
+                    (int) (color.getRed() * colorConstant),
+                    (int) (color.getGreen() * colorConstant),
+                    (int) (color.getBlue() * colorConstant)
+            );
+            g2.setColor(color);
+            g2.fillRect((int) (((i * thickness) + SCREEN_SIZE.width / 2) * SCREEN_SCALE),
                     (int) ((center - height / 2) * SCREEN_SCALE),
                     (int) Math.ceil(thickness * SCREEN_SCALE), (int) (height * SCREEN_SCALE)
             );
-            angle += angleIncrement;
         }
+
         g2.dispose();
     }
 }
