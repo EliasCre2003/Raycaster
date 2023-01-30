@@ -12,7 +12,7 @@ import static java.lang.Math.PI;
 
 public class GamePanel extends JPanel implements Runnable {
     private final Dimension SCREEN_SIZE = Main.SCREEN_SIZE;
-    private final Dimension DEFAULT_SCREEN_SIZE = new Dimension(2000, 1000);
+    private final Dimension DEFAULT_SCREEN_SIZE = new Dimension(1600, 900);
     private double SCREEN_SCALE = (double) SCREEN_SIZE.width / DEFAULT_SCREEN_SIZE.width;
     private int MAX_FRAME_RATE = 200;
     private Thread gameThread;
@@ -44,7 +44,7 @@ public class GamePanel extends JPanel implements Runnable {
     private final Cell[][] cellStatics = new Cell[map.getWidth()][map.getHeight()];
     private final double cellSize = (double) DEFAULT_SCREEN_SIZE.height / map.getHeight();
     private final double fov = Math.toRadians(90);
-    private final int rayCount = 1000;
+    private final int rayCount = DEFAULT_SCREEN_SIZE.width;
     private final double rayLength = 1000;
     private double[] distances = new double[rayCount];
     private Ray[] rays = new Ray[rayCount];
@@ -191,48 +191,47 @@ public class GamePanel extends JPanel implements Runnable {
         g2.fillRect(0, 0, SCREEN_SIZE.width, SCREEN_SIZE.height);
 
 
-        // Left-panel
-        map.draw(g2, 0, 0, 1000,1000, SCREEN_SCALE);
-        double angle = player.getAngle() - fov / 2.0;
-        double angleIncrement = fov / (double) rayCount;
-        g2.setColor(new Color(255, 255, 0));
-        g2.setStroke(new BasicStroke((float) (3 * SCREEN_SCALE)));
-        for (int i = 0; i < rayCount; i++) {
-            Line ray = new Line(
-                    player.getPosition().x, player.getPosition().y,
-                    player.getPosition().x + distances[i] * Math.cos(angle),
-                    player.getPosition().y + distances[i] * Math.sin(angle)
-            );
-            g2.drawLine((int) (ray.point1.x * SCREEN_SCALE), (int) (ray.point1.y * SCREEN_SCALE),
-                    (int) (ray.point2.x * SCREEN_SCALE), (int) (ray.point2.y * SCREEN_SCALE));
-            angle += angleIncrement;
-        }
-        player.draw(g2, SCREEN_SCALE);
-
-
         // Right-panel
-        double center = SCREEN_SIZE.height / 2.0;
-        double thickness = (double) SCREEN_SIZE.width / (rayCount * 2);
+        double center = DEFAULT_SCREEN_SIZE.height / 2.0;
+        double thickness = (double) DEFAULT_SCREEN_SIZE.width / rayCount;
         for (int i = 0; i < rayCount; i++) {
             Ray ray = rays[i];
             if (ray == null) continue;
             double distance = ray.getDistance();
             double height = rayLength * 90 / distance;
             Color color = ray.getColor();
-            double colorConstant = (rayLength - distance) / rayLength;
-            if (colorConstant < 0) colorConstant = 0;
-            if (colorConstant > 1) colorConstant = 1;
-            color = new Color(
-                    (int) (color.getRed() * colorConstant),
-                    (int) (color.getGreen() * colorConstant),
-                    (int) (color.getBlue() * colorConstant)
-            );
+//            double colorConstant = (rayLength - distance) / rayLength;
+//            if (colorConstant < 0) colorConstant = 0;
+//            if (colorConstant > 1) colorConstant = 1;
+//            color = new Color(
+//                    (int) (color.getRed() * colorConstant),
+//                    (int) (color.getGreen() * colorConstant),
+//                    (int) (color.getBlue() * colorConstant)
+//            );
             g2.setColor(color);
-            g2.fillRect((int) (((i * thickness) + SCREEN_SIZE.width / 2) * SCREEN_SCALE),
+            g2.fillRect((int) ((i * thickness) * SCREEN_SCALE),
                     (int) ((center - height / 2) * SCREEN_SCALE),
                     (int) Math.ceil(thickness * SCREEN_SCALE), (int) (height * SCREEN_SCALE)
             );
         }
+
+        // Map
+        map.draw(g2, 0, 0, 1000,1000, SCREEN_SCALE / (10 + 10/10));
+        double angle = player.getAngle() - fov / 2.0;
+        double angleIncrement = fov / (double) rayCount;
+        g2.setColor(new Color(255, 255, 0));
+        g2.setStroke(new BasicStroke((float) (1 * SCREEN_SCALE)));
+        for (int i = 0; i < rayCount; i++) {
+            Line ray = new Line(
+                    player.getPosition().x / 10, player.getPosition().y / 10,
+                    (player.getPosition().x + distances[i] * Math.cos(angle)) / 10,
+                    (player.getPosition().y + distances[i] * Math.sin(angle)) / 10
+            );
+            g2.drawLine((int) (ray.point1.x * SCREEN_SCALE), (int) (ray.point1.y * SCREEN_SCALE),
+                    (int) (ray.point2.x * SCREEN_SCALE), (int) (ray.point2.y * SCREEN_SCALE));
+            angle += angleIncrement;
+        }
+        player.draw(g2, SCREEN_SCALE / 10.0);
 
         g2.dispose();
     }
