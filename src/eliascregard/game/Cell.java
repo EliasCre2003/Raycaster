@@ -1,4 +1,4 @@
-package eliascregard.main;
+package eliascregard.game;
 
 import eliascregard.physics.Line;
 import eliascregard.physics.Vector2D;

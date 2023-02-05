@@ -1,46 +1,51 @@
-package eliascregard.main;
+package eliascregard.game;
+
+import eliascregard.main.PixelGrid;
 
 import java.awt.*;
 
 public class Map {
 
     private final Dimension size;
-    private final boolean[][] map;
+    private final int[][] map;
     private final PixelGrid pixelGrid;
 
-    public Map(boolean[][] map) {
+    public Map(int[][] map) {
         this.size = new Dimension(map.length, map[0].length);
         this.map = map;
-        this.pixelGrid = new PixelGrid(size.width, size.height);
-        correctPixelGrid();
-    }
-    public Map(int[][] bitMap) {
-        this.size = new Dimension(bitMap.length, bitMap[0].length);
-        map = new boolean[bitMap.length][bitMap[0].length];
-        for (int x = 0; x < bitMap.length; x++) {
-            for (int y = 0; y < bitMap[0].length; y++) {
-                map[x][y] = bitMap[y][x] == 1;
-            }
-        }
         this.pixelGrid = new PixelGrid(size.width, size.height);
         correctPixelGrid();
     }
 
     public Map(int width, int height) {
         this.size = new Dimension(width, height);
-        this.map = new boolean[width][height];
+        this.map = new int[width][height];
         this.pixelGrid = new PixelGrid(width, height);
     }
 
-    public boolean[][] getMap() {
+    public int[][] getMap() {
         return this.map;
     }
 
-    public boolean get(int x, int y) {
+    public int get(int x, int y) {
         return this.map[x][y];
     }
 
-    public void set(int x, int y, boolean value) {
+    public int get(Point p) {
+        return get(p.x, p.y);
+    }
+
+    public boolean isWall(int x, int y) {
+        if (x < 0 || x >= size.width || y < 0 || y >= size.height) {
+            return false;
+        }
+        return map[x][y] >= 1;
+    }
+    public boolean isWall(Point p) {
+        return isWall(p.x, p.y);
+    }
+
+    public void set(int x, int y, int value) {
         this.map[x][y] = value;
     }
 
@@ -55,7 +60,7 @@ public class Map {
     private void correctPixelGrid() {
         for (int x = 0; x < size.width; x++) {
             for (int y = 0; y < size.height; y++) {
-                if (map[x][y]) {
+                if (isWall(x, y)) {
                     pixelGrid.set(x, y, new Color(255, 255, 255, 255));
                 }
             }
